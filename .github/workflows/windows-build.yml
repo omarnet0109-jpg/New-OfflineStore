@@ -1,0 +1,70 @@
+name: OfflineStore Windows Build & Setup
+
+on:
+  push:
+    branches: [main, master, رئيسي]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run Python Automated Tests
+        shell: pwsh
+        run: |
+          python -m unittest discover -s tests -v
+
+      - name: Download Native SQLite x86
+        shell: pwsh
+        run: |
+          $archive = Join-Path $env:RUNNER_TEMP 'sqlite-x86.zip'
+          Invoke-WebRequest 'https://www.sqlite.org/2026/sqlite-dll-win-x86-3540100.zip' -OutFile $archive
+          $folder = Join-Path $env:RUNNER_TEMP 'sqlite-native'
+          Expand-Archive -Path $archive -DestinationPath $folder
+          New-Item -ItemType Directory -Force -Path 'src/OfflineStore/native' | Out-Null
+          Copy-Item (Join-Path $folder 'sqlite3.dll') 'src/OfflineStore/native/sqlite3.dll'
+          Copy-Item (Join-Path $folder 'sqlite3.dll') 'src/OfflineStore/native/e_sqlite3.dll'
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build Desktop WPF Application (Release x86)
+        shell: pwsh
+        run: |
+          msbuild src/OfflineStore/OfflineStore.csproj -restore -t:Rebuild -p:Configuration=Release -p:Platform=AnyCPU -p:PlatformTarget=x86 -verbosity:minimal
+
+      - name: Install NSIS Compiler
+        shell: pwsh
+        run: |
+          choco install nsis --yes --no-progress
+
+      - name: Build Setup.exe
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem 'src/OfflineStore/bin/Release' -Recurse -Filter 'OfflineStore.exe' | Select-Object -First 1
+          if (-not $exe) { throw 'Executable not found' }
+          $appDir = $exe.Directory.FullName
+          $compiler = Join-Path ([Environment]::GetFolderPath('ProgramFilesX86')) 'NSIS\makensis.exe'
+          New-Item -ItemType Directory -Path dist -Force | Out-Null
+          $out = Join-Path ((Resolve-Path 'dist').Path) 'OfflineStore_Setup_v1.0.exe'
+          & $compiler "/DINSTALLER_QA" "/DAPP_PAYLOAD=$appDir" "/DOUTPUT_EXE=$out" 'installer/OfflineStore.nsi'
+          if (-not (Test-Path $out)) { throw 'Setup build failed' }
+          Get-FileHash -Algorithm SHA256 -Path $out | Format-List
+
+      - name: Upload Setup.exe to Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: OfflineStore_Setup_Windows
+          path: dist/OfflineStore_Setup_v1.0.exe
+          retention-days: 30

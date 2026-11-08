@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup><TargetFramework>net48</TargetFramework><OutputType>Exe</OutputType><LangVersion>7.3</LangVersion><PlatformTarget>x86</PlatformTarget><AssemblyName>InfrastructureTests</AssemblyName></PropertyGroup>
+ <ItemGroup>
+  <Reference Include="PresentationCore" /><Reference Include="PresentationFramework" /><Reference Include="WindowsBase" />
+  <Compile Include="../../src/OfflineStore/Appearance/AppearanceService.cs" Link="AppearanceService.cs" />
+  <Compile Include="../../src/OfflineStore/Models/Records.cs" Link="Records.cs" />
+  <Compile Include="../../src/OfflineStore/Services/*.cs" Link="Services/%(Filename)%(Extension)" />
+  <Compile Include="../../src/OfflineStore/Supply/SupplyVoucherModels.cs" Link="SupplyVoucherModels.cs" />
+  <Compile Include="../../src/OfflineStore/Supply/SupplyVoucherService.cs" Link="SupplyVoucherService.cs" />
+  <Compile Include="../../src/OfflineStore/Devices/SerialScannerSettings.cs" Link="SerialScannerSettings.cs" />
+  <Compile Include="../../src/OfflineStore/Security/LocalPasswordService.cs" Link="LocalPasswordService.cs" />
+  <PackageReference Include="System.Data.SQLite" Version="2.0.4" />
+  <Compile Include="../../src/OfflineStore/Infrastructure/*.cs" Link="Infrastructure/%(Filename)%(Extension)" />
+  <Compile Include="../../src/OfflineStore/Security/UserAuthService.cs" Link="UserAuthService.cs" />
+  <EmbeddedResource Include="../../src/OfflineStore/Infrastructure/Schema.sql"><LogicalName>OfflineStore.Infrastructure.Schema.sql</LogicalName></EmbeddedResource>
+  <EmbeddedResource Include="../../src/OfflineStore/Infrastructure/Migrations/*.sql"><LogicalName>OfflineStore.Infrastructure.Migrations.%(Filename)%(Extension)</LogicalName></EmbeddedResource>
+  <None Include="../../src/OfflineStore/native/sqlite3.dll" Link="sqlite3.dll" CopyToOutputDirectory="PreserveNewest" />
+  <None Include="../../src/OfflineStore/native/e_sqlite3.dll" Link="e_sqlite3.dll" CopyToOutputDirectory="PreserveNewest" />
+ </ItemGroup>
+</Project>

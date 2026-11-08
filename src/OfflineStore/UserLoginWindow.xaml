@@ -1,0 +1,90 @@
+<Window x:Class="OfflineStore.UserLoginWindow"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:brand="clr-namespace:OfflineStore.Appearance"
+ Title="تسجيل الدخول | OfflineStore" Height="620" Width="540" MinWidth="440" MinHeight="430"
+ WindowStartupLocation="CenterScreen" ResizeMode="CanResizeWithGrip"
+ FlowDirection="RightToLeft" FontFamily="Segoe UI" FontSize="14"
+ Background="{DynamicResource BaseBrush}" Foreground="{DynamicResource TextBrush}">
+ <ScrollViewer Background="{DynamicResource BrandPanelBrush}"
+               VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+  <Border Margin="16" Padding="20" CornerRadius="19"
+          Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}"
+          BorderThickness="1" HorizontalAlignment="Stretch">
+    <Border.Effect>
+      <DropShadowEffect Color="#001329" BlurRadius="25" ShadowDepth="7" Opacity="0.30"/>
+    </Border.Effect>
+   <StackPanel>
+    <StackPanel HorizontalAlignment="Center" Orientation="Horizontal" Margin="0,0,0,8">
+      <Border Width="52" Height="52" Background="{DynamicResource PrimaryGradientBrush}"
+              CornerRadius="11" Padding="5" Margin="9,0">
+        <Image Source="{x:Static brand:BrandAssets.StoreIcon}" Stretch="Uniform"/>
+      </Border>
+      <StackPanel VerticalAlignment="Center">
+        <TextBlock Text="OfflineStore" FlowDirection="LeftToRight" FontSize="25"
+                   Foreground="{DynamicResource PrimaryBrush}" FontWeight="Bold"/>
+        <TextBlock Text="إدارة المبيعات والمخزون" FontSize="11"
+                   Foreground="{DynamicResource SecondaryTextBrush}"/>
+      </StackPanel>
+    </StackPanel>
+    <TextBlock x:Name="PageTitle" Text="دخول الموظف" FontSize="19" FontWeight="SemiBold"
+               TextWrapping="Wrap" HorizontalAlignment="Center" Margin="0,0,0,14"/>
+
+    <TextBlock x:Name="AdminNameLabel" Text="اسم المدير" Visibility="Collapsed" Margin="4,0,4,3"/>
+    <TextBox x:Name="AdminName" Text="مدير النظام" Visibility="Collapsed" TabIndex="1"
+             Height="40" Margin="0,0,0,12" VerticalContentAlignment="Center" />
+
+    <TextBlock x:Name="LoginNameLabel" Text="اسم المستخدم" Margin="4,0,4,3"/>
+    <TextBox x:Name="LoginName" Text="admin" TabIndex="2"
+             Height="40" Margin="0,0,0,12" VerticalContentAlignment="Center"
+             ToolTip="اسم المستخدم (يدعم الحروف الإنجليزية والعربية)"/>
+
+    <TextBlock x:Name="PasswordLabel" Text="الرقم السري" Margin="4,0,4,3"/>
+    <Grid Margin="0,0,0,12">
+      <PasswordBox x:Name="LoginPassword" Height="40" TabIndex="3"
+                   MaxLength="128" KeyDown="PasswordEnter" PasswordChanged="LoginPasswordChanged"
+                   VerticalContentAlignment="Center" Padding="75,6,10,6"/>
+      <TextBox x:Name="VisiblePassword" Height="40" TabIndex="3"
+               MaxLength="128" Visibility="Collapsed" KeyDown="PasswordEnter" TextChanged="VisiblePasswordChanged"
+               VerticalContentAlignment="Center" Padding="75,6,10,6"/>
+      <Button x:Name="TogglePasswordButton" Click="TogglePasswordClick" TabIndex="4"
+              Content="👁 إظهار" ToolTip="إظهار / إخفاء كلمة المرور"
+              HorizontalAlignment="Left" VerticalAlignment="Center"
+              Margin="6,0,0,0" Padding="8,4" Height="28" FontSize="11"
+              Style="{StaticResource OutlineButton}"/>
+    </Grid>
+
+    <TextBlock x:Name="ConfirmLabel" Text="تأكيد كلمة المرور" Visibility="Collapsed" Margin="4,0,4,3"/>
+    <Grid x:Name="ConfirmPasswordGrid" Margin="0,0,0,12" Visibility="Collapsed">
+      <PasswordBox x:Name="ConfirmPassword" Height="40" TabIndex="5"
+                   MaxLength="128" KeyDown="PasswordEnter" PasswordChanged="ConfirmPasswordChanged"
+                   VerticalContentAlignment="Center" Padding="75,6,10,6"/>
+      <TextBox x:Name="VisibleConfirmPassword" Height="40" TabIndex="5"
+               MaxLength="128" Visibility="Collapsed" KeyDown="PasswordEnter" TextChanged="VisibleConfirmPasswordChanged"
+               VerticalContentAlignment="Center" Padding="75,6,10,6"/>
+      <Button x:Name="ToggleConfirmPasswordButton" Click="ToggleConfirmPasswordClick" TabIndex="6"
+              Content="👁 إظهار" ToolTip="إظهار / إخفاء تأكيد كلمة المرور"
+              HorizontalAlignment="Left" VerticalAlignment="Center"
+              Margin="6,0,0,0" Padding="8,4" Height="28" FontSize="11"
+              Style="{StaticResource OutlineButton}"/>
+    </Grid>
+
+    <CheckBox x:Name="RememberLoginBox" Content="حفظ الدخول التلقائي لهذا الموظف على حساب Windows الحالي"
+              Margin="2,2,2,8" ToolTip="اختياري؛ مش متاح للمدير. غير مناسب لجهاز Windows مشترك بدون قفل."
+              IsChecked="False" TabIndex="7"/>
+    <TextBlock x:Name="HelpText" TextWrapping="Wrap" FontSize="12"
+               Foreground="{DynamicResource SecondaryTextBrush}"
+               Text="اكتب رقم السر للمتابعة. الرقم الجديد من 6 إلى 12 رقم؛ كلمات المرور القديمة ما زالت تعمل." Margin="2,4,2,12"/>
+    <TextBlock x:Name="ErrorMessage" TextWrapping="Wrap" Foreground="{DynamicResource DangerBrush}"
+               Margin="2,0,2,10" MinHeight="18"/>
+    <Grid Margin="0,4,0,0">
+      <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+      <Button x:Name="SubmitButton" Grid.Column="0" Content="دخول" Click="Submit"
+              Height="43" MinWidth="0" Margin="3" IsDefault="True" TabIndex="8"/>
+      <Button Grid.Column="1" Content="إغلاق" Click="Cancel" Height="43"
+              MinWidth="0" Margin="3" Style="{StaticResource OutlineButton}" IsCancel="True" TabIndex="9"/>
+    </Grid>
+   </StackPanel>
+  </Border>
+ </ScrollViewer>
+</Window>

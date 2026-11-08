@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <LangVersion>7.3</LangVersion>
+    <PlatformTarget>x86</PlatformTarget>
+    <RootNamespace>OfflineStore</RootNamespace>
+    <AssemblyName>OfflineStore</AssemblyName>
+    <ApplicationIcon>Assets\OfflineStore.ico</ApplicationIcon>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Printing" />
+    <Reference Include="ReachFramework" />
+    <Reference Include="System.Security" />
+    <PackageReference Include="System.Data.SQLite" Version="2.0.4" />
+    <EmbeddedResource Include="Infrastructure\Schema.sql" />
+    <EmbeddedResource Include="Infrastructure\Migrations\002_settings_and_security.sql" />
+    <EmbeddedResource Include="Infrastructure\Migrations\003_units_users_alerts.sql" />
+    <EmbeddedResource Include="Infrastructure\Migrations\004_serial_scanner.sql" />
+    <EmbeddedResource Include="Infrastructure\Migrations\005_invoice_safety.sql" />
+    <EmbeddedResource Include="Infrastructure\Migrations\006_posted_only_stock.sql" />
+    <EmbeddedResource Include="Infrastructure\Migrations\007_employee_notes.sql" />
+    <EmbeddedResource Include="Infrastructure\Migrations\008_product_supplier.sql" />
+    <EmbeddedResource Include="Infrastructure\Migrations\009_supply_vouchers.sql" />
+    <EmbeddedResource Include="Infrastructure\Migrations\010_sale_line_names.sql" />
+    <EmbeddedResource Include="Infrastructure\Migrations\011_employee_permissions.sql" />
+    <EmbeddedResource Include="Infrastructure\Migrations\012_price_levels.sql" />
+    <EmbeddedResource Include="Infrastructure\Migrations\013_precise_sale_costs.sql" />
+    <EmbeddedResource Include="Infrastructure\Migrations\014_journal_foundation.sql" />
+    <EmbeddedResource Include="Infrastructure\Migrations\015_settlements.sql" />
+    <EmbeddedResource Include="Infrastructure\Migrations\016_advance_applications.sql" />
+    <EmbeddedResource Include="Infrastructure\Migrations\017_invoice_allocations.sql" />
+    <EmbeddedResource Include="Infrastructure\Migrations\018_returns.sql" />
+    <EmbeddedResource Include="Infrastructure\Migrations\019_cash_control.sql" />
+    <EmbeddedResource Include="Infrastructure\Migrations\020_cutover_integrity.sql" />
+    <EmbeddedResource Include="Infrastructure\Migrations\021_return_credits.sql" />
+    <EmbeddedResource Include="Infrastructure\Migrations\022_activation_results.sql" />
+    <EmbeddedResource Include="Infrastructure\Migrations\023_inventory_carrying.sql" />
+    <EmbeddedResource Include="Infrastructure\Migrations\024_zero_value_returns.sql" />
+    <Resource Include="Assets\OfflineStore.ico" />
+    <PackageReference Include="QRCoder" Version="1.6.0" />
+    <None Include="native\e_sqlite3.dll" Condition="Exists('native\e_sqlite3.dll')">
+      <Link>e_sqlite3.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="native\sqlite3.dll" Condition="Exists('native\sqlite3.dll')">
+      <Link>sqlite3.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <Target Name="RequireNativeSQLite" BeforeTargets="Build">
+    <Error Condition="!Exists('native\sqlite3.dll') Or !Exists('native\e_sqlite3.dll')" Text="Missing Windows x86 sqlite3.dll or e_sqlite3.dll." />
+  </Target>
+</Project>

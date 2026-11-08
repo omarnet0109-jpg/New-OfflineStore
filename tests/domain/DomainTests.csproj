@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../src/OfflineStore/Models/Records.cs" Link="Records.cs" />
+    <Compile Include="../../src/OfflineStore/Supply/SupplyVoucherModels.cs" Link="SupplyVoucherModels.cs" />
+  </ItemGroup>
+</Project>

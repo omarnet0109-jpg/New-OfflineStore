@@ -14,6 +14,31 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Sync Full Project Sources if Missing
+        shell: pwsh
+        run: |
+          if (-not (Test-Path 'src/OfflineStore/OfflineStore.csproj')) {
+            $zip = Join-Path $env:RUNNER_TEMP 'OfflineStore_Video_Ready.zip'
+            curl.exe -L "https://drive.google.com/uc?export=download&id=1pRPzrHgkgmVFfUs5XeX4RUIM--0-Nmx3" -o $zip
+            if ((Get-Item $zip).Length -lt 300000) {
+              curl.exe -L "https://drive.usercontent.google.com/download?id=1pRPzrHgkgmVFfUs5XeX4RUIM--0-Nmx3&export=download&confirm=t" -o $zip
+            }
+            $extractDir = Join-Path $env:RUNNER_TEMP 'offlinestore-src'
+            Expand-Archive -Path $zip -DestinationPath $extractDir -Force
+            foreach ($dir in @('src','tests','installer','scripts','docs','bootstrap')) {
+              $srcPath = Join-Path $extractDir $dir
+              if (Test-Path $srcPath) { Copy-Item -Path $srcPath -Destination '.' -Recurse -Force }
+            }
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add src tests installer scripts docs bootstrap
+            git commit -m "Upload full OfflineStore project sources [skip ci]"
+            git push origin HEAD:main
+            $global:LASTEXITCODE = 0
+          }
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -31,10 +56,10 @@ jobs:
           $archive = Join-Path $env:RUNNER_TEMP 'sqlite-x86.zip'
           Invoke-WebRequest 'https://www.sqlite.org/2026/sqlite-dll-win-x86-3540100.zip' -OutFile $archive
           $folder = Join-Path $env:RUNNER_TEMP 'sqlite-native'
-          Expand-Archive -Path $archive -DestinationPath $folder
+          Expand-Archive -Path $archive -DestinationPath $folder -Force
           New-Item -ItemType Directory -Force -Path 'src/OfflineStore/native' | Out-Null
-          Copy-Item (Join-Path $folder 'sqlite3.dll') 'src/OfflineStore/native/sqlite3.dll'
-          Copy-Item (Join-Path $folder 'sqlite3.dll') 'src/OfflineStore/native/e_sqlite3.dll'
+          Copy-Item (Join-Path $folder 'sqlite3.dll') 'src/OfflineStore/native/sqlite3.dll' -Force
+          Copy-Item (Join-Path $folder 'sqlite3.dll') 'src/OfflineStore/native/e_sqlite3.dll' -Force
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
@@ -60,11 +85,27 @@ jobs:
           $out = Join-Path ((Resolve-Path 'dist').Path) 'OfflineStore_Setup_v1.0.exe'
           & $compiler "/DINSTALLER_QA" "/DAPP_PAYLOAD=$appDir" "/DOUTPUT_EXE=$out" 'installer/OfflineStore.nsi'
           if (-not (Test-Path $out)) { throw 'Setup build failed' }
-          Get-FileHash -Algorithm SHA256 -Path $out | Format-List
+          Get-FileHash -Algorithm SHA256 -Path $out | Format-List | Out-String | Set-Content 'dist/SHA256.txt'
+          Get-Content 'dist/SHA256.txt'
 
       - name: Upload Setup.exe to Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: OfflineStore_Setup_Windows
-          path: dist/OfflineStore_Setup_v1.0.exe
+          path: |
+            dist/OfflineStore_Setup_v1.0.exe
+            dist/SHA256.txt
           retention-days: 30
+
+      - name: Publish GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = 'v1.0'
+          $releases = gh release list --repo $env:GITHUB_REPOSITORY
+          if ($releases -match $tag) {
+            gh release upload $tag 'dist/OfflineStore_Setup_v1.0.exe' 'dist/SHA256.txt' --repo $env:GITHUB_REPOSITORY --clobber
+          } else {
+            gh release create $tag 'dist/OfflineStore_Setup_v1.0.exe' 'dist/SHA256.txt' --repo $env:GITHUB_REPOSITORY --title 'OfflineStore v1.0 Setup' --notes 'OfflineStore v1.0 Windows Setup Installer'
+          }

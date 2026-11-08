@@ -1,0 +1,11 @@
+.vs/
+**/bin/
+**/obj/
+**/__pycache__/
+*.py[cod]
+*.user
+*.suo
+*.db
+*.db-shm
+*.db-wal
+src/OfflineStore/native/sqlite3.dll

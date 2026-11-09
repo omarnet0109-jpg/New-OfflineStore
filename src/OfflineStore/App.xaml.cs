@@ -47,6 +47,15 @@ namespace OfflineStore
                     Shutdown();
                     return;
                 }
+                if (!ActivationService.IsActivated())
+                {
+                    var activation = new ActivationWindow();
+                    if (activation.ShowDialog() != true)
+                    {
+                        Shutdown();
+                        return;
+                    }
+                }
                 StoreService service=null;
                 var location=new DatabaseLocationService();
                 while(service==null)

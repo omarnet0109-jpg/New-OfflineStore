@@ -2,11 +2,14 @@ name: OfflineStore Windows Build & Setup
 
 on:
   push:
-    branches: [main, master, رئيسي]
+    branches: [main, master]
   workflow_dispatch:
 
 permissions:
   contents: write
+
+env:
+  PYTHONUTF8: "1"
 
 jobs:
   build:
@@ -48,6 +51,8 @@ jobs:
       - name: Run Python Automated Tests
         shell: pwsh
         run: |
+          # Expected 17 incl. accounting ledger, employee permissions and receipt previews
+          # OfflineStore-Setup-v0.15.0-ALL-IN-ONE.exe
           python -m unittest discover -s tests -v
 
       - name: Download Native SQLite x86
@@ -64,7 +69,7 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Build Desktop WPF Application (Release x86)
+      - name: Build WPF desktop app
         shell: pwsh
         run: |
           msbuild src/OfflineStore/OfflineStore.csproj -restore -t:Rebuild -p:Configuration=Release -p:Platform=AnyCPU -p:PlatformTarget=x86 -verbosity:minimal
@@ -74,7 +79,7 @@ jobs:
         run: |
           choco install nsis --yes --no-progress
 
-      - name: Build Setup.exe
+      - name: Build offline application Setup.exe
         shell: pwsh
         run: |
           $exe = Get-ChildItem 'src/OfflineStore/bin/Release' -Recurse -Filter 'OfflineStore.exe' | Select-Object -First 1
@@ -88,7 +93,7 @@ jobs:
           Get-FileHash -Algorithm SHA256 -Path $out | Format-List | Out-String | Set-Content 'dist/SHA256.txt'
           Get-Content 'dist/SHA256.txt'
 
-      - name: Upload Setup.exe to Artifacts
+      - name: Upload Setup.exe preview
         uses: actions/upload-artifact@v4
         with:
           name: OfflineStore_Setup_Windows
